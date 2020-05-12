@@ -8,7 +8,7 @@
 #SBATCH --ntasks=1
 #SBATCH --time=03:00:00
 #SBATCH --mem=0
-#SBATCH --gres=gpu:p100l:1
+#SBATCH --gres=gpu:p100l:4
 #SBATCH --cpus-per-task=3
 
 cd $SLURM_TMPDIR
