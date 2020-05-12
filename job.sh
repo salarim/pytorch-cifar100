@@ -22,5 +22,5 @@ pip install --no-index --upgrade pip
 pip install --no-index -r requirements.txt
 
 
-python train -net resnet18
+python train.py -net resnet18
 
