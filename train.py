@@ -137,7 +137,7 @@ if __name__ == '__main__':
         train(epoch)
         acc = eval_training(epoch)
 
-         train_scheduler.step(epoch)
+        train_scheduler.step(epoch)
 
         #start to save best performance model after learning rate decay to 0.01 
         if epoch > settings.MILESTONES[1] and best_acc < acc:
