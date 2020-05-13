@@ -99,6 +99,8 @@ if __name__ == '__main__':
 
     # net = get_network(args, use_gpu=args.gpu)
     net = resnet(depth=20, num_classes=100)
+    if args.gpu:
+        net = net.cuda()
         
     #data preprocessing:
     cifar100_training_loader = get_training_dataloader(
