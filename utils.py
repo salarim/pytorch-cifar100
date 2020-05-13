@@ -147,7 +147,7 @@ def get_network(args, use_gpu=True):
     return net
 
 
-def get_training_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=True):
+def get_training_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=True, disable_rotate=False):
     """ return training dataloader
     Args:
         mean: mean of cifar100 training dataset
@@ -158,15 +158,16 @@ def get_training_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=Tru
         shuffle: whether to shuffle 
     Returns: train_data_loader:torch dataloader object
     """
-
-    transform_train = transforms.Compose([
+    trans = [
         #transforms.ToPILImage(),
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
-        # transforms.RandomRotation(15),
+        transforms.RandomRotation(15),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
-    ])
+    ]
+
+    transform_train = transforms.Compose(trans if not disable_rotate else trans[:2]+trans[3:])
     #cifar100_training = CIFAR100Train(path, transform=transform_train)
     cifar100_training = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
     cifar100_training_loader = DataLoader(

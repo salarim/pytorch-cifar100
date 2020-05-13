@@ -92,33 +92,59 @@ if __name__ == '__main__':
     parser.add_argument('-b', type=int, default=128, help='batch size for dataloader')
     parser.add_argument('-s', type=bool, default=True, help='whether shuffle the dataset')
     parser.add_argument('-lr', type=float, default=0.1, help='initial learning rate')
-    args = parser.parse_args()
 
-    # net = get_network(args, use_gpu=args.gpu)
-    net = resnet(depth=20, num_classes=100)
-    if args.gpu:
-        net = net.cuda()
-        
+    parser.add_argument('--new-model', action='store_true', default=False)
+    parser.add_argument('--new-optim', action='store_true', default=False)
+    parser.add_argument('--new-normalize', action='store_true', default=False)
+    parser.add_argument('--disable-rotate', action='store_true', default=False)
+
+    args = parser.parse_args()
+    print(args)
+
+    if args.new_model:
+        net = resnet(depth=20, num_classes=100)
+        if args.gpu:
+            net = net.cuda()
+    else:
+        net = get_network(args, use_gpu=args.gpu)
+    
+    if args.new_optim:
+        MILESTONES = [100, 150]
+        gamma = 0.1
+        weight_decay = 1e-4
+    else:
+        MILESTONES = [60, 120, 160]
+        gamma = 0.2
+        weight_decay = 5e-4
+
+    if args.new_normalize:
+        CIFAR100_TRAIN_MEAN = (0.4914, 0.4822, 0.4465)
+        CIFAR100_TRAIN_STD = (0.2023, 0.1994, 0.2010)
+    else:
+        CIFAR100_TRAIN_MEAN = (0.5070751592371323, 0.48654887331495095, 0.4409178433670343)
+        CIFAR100_TRAIN_STD = (0.2673342858792401, 0.2564384629170883, 0.27615047132568404)
+
     #data preprocessing:
     cifar100_training_loader = get_training_dataloader(
-        settings.CIFAR100_TRAIN_MEAN,
-        settings.CIFAR100_TRAIN_STD,
+        CIFAR100_TRAIN_MEAN,
+        CIFAR100_TRAIN_STD,
         num_workers=args.w,
         batch_size=args.b,
-        shuffle=args.s
+        shuffle=args.s,
+        args.disable_rotate
     )
     
     cifar100_test_loader = get_test_dataloader(
-        settings.CIFAR100_TRAIN_MEAN,
-        settings.CIFAR100_TRAIN_STD,
+        CIFAR100_TRAIN_MEAN,
+        CIFAR100_TRAIN_STD,
         num_workers=args.w,
         batch_size=args.b,
         shuffle=args.s
     )
     
     loss_function = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
-    train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES, gamma=0.1) #learning rate decay
+    optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=weight_decay)
+    train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=MILESTONES, gamma=gamma) #learning rate decay
     iter_per_epoch = len(cifar100_training_loader)
     checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, settings.TIME_NOW)
 
@@ -140,7 +166,7 @@ if __name__ == '__main__':
         train_scheduler.step(epoch)
 
         #start to save best performance model after learning rate decay to 0.01 
-        if epoch > settings.MILESTONES[1] and best_acc < acc:
+        if epoch > MILESTONES[1] and best_acc < acc:
             torch.save(net.state_dict(), checkpoint_path.format(net=args.net, epoch=epoch, type='best'))
             best_acc = acc
             continue
