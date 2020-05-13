@@ -131,7 +131,7 @@ if __name__ == '__main__':
         num_workers=args.w,
         batch_size=args.b,
         shuffle=args.s,
-        args.disable_rotate
+        disable_rotate=args.disable_rotate
     )
     
     cifar100_test_loader = get_test_dataloader(
