@@ -24,7 +24,7 @@ from torch.autograd import Variable
 
 from conf import settings
 from utils import get_network, get_training_dataloader, get_test_dataloader, WarmUpLR
-from resnet import resnet
+from models.myresnet import resnet
 
 def train(epoch):
 
