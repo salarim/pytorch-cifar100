@@ -8,6 +8,7 @@ author baiyu
 
 import os
 import sys
+import time
 import argparse
 from datetime import datetime
 
@@ -29,7 +30,13 @@ from models.myresnet import resnet
 def train(epoch):
 
     net.train()
+
+    batch_time = AverageMeter()
+    data_time = AverageMeter()
+    end = time.time()
+
     for batch_index, (images, labels) in enumerate(cifar100_training_loader):
+        data_time.update(time.time() - end)
 
         images = Variable(images)
         labels = Variable(labels)
@@ -47,12 +54,19 @@ def train(epoch):
 
         last_layer = list(net.children())[-1]
 
-        print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\tLoss: {:0.4f}\tLR: {:0.6f}'.format(
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\t'
+            'DTime {data_time.avg:.3f}\t'
+            'BTime {batch_time.avg:.3f}\t'
+            'Loss: {:0.4f}\tLR: {:0.6f}'.format(
             loss.item(),
             optimizer.param_groups[0]['lr'],
             epoch=epoch,
             trained_samples=batch_index * args.b + len(images),
-            total_samples=len(cifar100_training_loader.dataset)
+            total_samples=len(cifar100_training_loader.dataset),
+            batch_time=batch_time, data_time=data_time
         ))
 
 
@@ -82,6 +96,25 @@ def eval_training(epoch):
     print()
 
     return correct.float() / len(cifar100_test_loader.dataset)
+
+
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
 
 if __name__ == '__main__':
     
