@@ -26,6 +26,7 @@ from torch.autograd import Variable
 from conf import settings
 from utils import get_network, get_training_dataloader, get_test_dataloader
 from models.myresnet import resnet
+from data_utils import DataConfig, DataLoaderConstructor
 
 def train(epoch):
 
@@ -130,6 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('--new-optim', action='store_true', default=False)
     parser.add_argument('--new-normalize', action='store_true', default=False)
     parser.add_argument('--disable-rotate', action='store_true', default=False)
+    parser.add_argument('--new-data-loader', action='store_true', default=False)
 
     args = parser.parse_args()
     print(args)
@@ -158,22 +160,31 @@ if __name__ == '__main__':
         CIFAR100_TRAIN_STD = (0.2673342858792401, 0.2564384629170883, 0.27615047132568404)
 
     #data preprocessing:
-    cifar100_training_loader = get_training_dataloader(
-        CIFAR100_TRAIN_MEAN,
-        CIFAR100_TRAIN_STD,
-        num_workers=args.w,
-        batch_size=args.b,
-        shuffle=args.s,
-        disable_rotate=args.disable_rotate
-    )
-    
-    cifar100_test_loader = get_test_dataloader(
-        CIFAR100_TRAIN_MEAN,
-        CIFAR100_TRAIN_STD,
-        num_workers=args.w,
-        batch_size=args.b,
-        shuffle=args.s
-    )
+    if args.new_data_loader:
+        data_config = DataConfig(args, train=True, dataset='cifar100',
+                                             dataset_type='softmax', is_continual=True, 
+                                             batch_size=args.b, workers=args.w,  tasks=1, 
+                                             exemplar_size=0, oversample_ratio=0.0)
+        cifar100_training_loader = DataLoaderConstructor(data_config).data_loaders[0]
+        data_config.train = False
+        cifar100_test_loader = DataLoaderConstructor(data_config).data_loaders[0]
+    else:
+        cifar100_training_loader = get_training_dataloader(
+            CIFAR100_TRAIN_MEAN,
+            CIFAR100_TRAIN_STD,
+            num_workers=args.w,
+            batch_size=args.b,
+            shuffle=args.s,
+            disable_rotate=args.disable_rotate
+        )
+        
+        cifar100_test_loader = get_test_dataloader(
+            CIFAR100_TRAIN_MEAN,
+            CIFAR100_TRAIN_STD,
+            num_workers=args.w,
+            batch_size=args.b,
+            shuffle=args.s
+        )
     
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=weight_decay)
