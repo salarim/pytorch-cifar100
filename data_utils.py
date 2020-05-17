@@ -38,25 +38,10 @@ class DataLoaderConstructor:
                                                     indexes, transforms)
 
     def get_data_targets(self, dataset_name):
-        if dataset_name == 'mnist':
-            dataset = torchvision.datasets.MNIST('./data/mnist',
-                                                  train=self.config.train, download=True)
-            data, targets = dataset.data, dataset.targets
-        elif dataset_name == 'cifar10':
-            dataset = torchvision.datasets.CIFAR10('./data/cifar10',
-                                                    train=self.config.train, download=True)
-            data, targets = dataset.data, dataset.targets
-        elif dataset_name == 'cifar100':
-            dataset = torchvision.datasets.CIFAR100('./data/cifar100',
+        if dataset_name == 'cifar100':
+            dataset = torchvision.datasets.CIFAR100('./data',
                                                      train=self.config.train, download=True)
             data, targets = dataset.data, dataset.targets
-        elif dataset_name == 'imagenet':
-            if self.config.train:
-                file_path = './data/imagenet/imagenet_train_500.h5'
-            else:
-                file_path = './data/imagenet/imagenet_test_100.h5'
-            with h5py.File(file_path, 'r') as f:
-                data, targets = f['data'][:], f['labels'][:]
         else:
             raise ValueError('dataset is not supported.')
             
