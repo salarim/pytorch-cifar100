@@ -9,19 +9,18 @@ import torchvision
 
 class DataConfig:
 
-    def __init__(self, args, train, dataset, dataset_type, is_continual, batch_size, 
-                 workers=None,  tasks=None, exemplar_size=None, oversample_ratio=None):
+    def __init__(self, train, dataset, dataset_type, is_continual, batch_size, 
+                 workers,  tasks, exemplar_size, oversample_ratio):
         
         self.train = train
         self.dataset = dataset
         self.dataset_type = dataset_type
         self.is_continual = is_continual
         self.batch_size = batch_size
-
-        self.workers = workers if workers else args.workers
-        self.tasks = tasks if tasks else args.tasks
-        self.exemplar_size = exemplar_size if exemplar_size else args.exemplar_size
-        self.oversample_ratio = oversample_ratio if oversample_ratio else args.oversample_ratio
+        self.workers = workers
+        self.tasks = tasks
+        self.exemplar_size = exemplar_size
+        self.oversample_ratio = oversample_ratio
 
 
 class DataLoaderConstructor:

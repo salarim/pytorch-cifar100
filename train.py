@@ -161,10 +161,10 @@ if __name__ == '__main__':
 
     #data preprocessing:
     if args.new_data_loader:
-        data_config = DataConfig(args, train=True, dataset='cifar100',
-                                             dataset_type='softmax', is_continual=True, 
-                                             batch_size=args.b, workers=args.w,  tasks=1, 
-                                             exemplar_size=0, oversample_ratio=0.0)
+        data_config = DataConfig(train=True, dataset='cifar100',
+                                 dataset_type='softmax', is_continual=True, 
+                                 batch_size=args.b, workers=args.w,  tasks=1, 
+                                 exemplar_size=0, oversample_ratio=0.0)
         cifar100_training_loader = DataLoaderConstructor(data_config).data_loaders[0]
         data_config.train = False
         cifar100_test_loader = DataLoaderConstructor(data_config).data_loaders[0]
