@@ -44,12 +44,12 @@ class DataLoaderConstructor:
         else:
             raise ValueError('dataset is not supported.')
             
-        if torch.is_tensor(targets):
-            data = data.numpy()
-            targets = targets.numpy()
-        elif type(targets) == list:
-            data = np.array(data)
-            targets = np.array(targets)
+        # if torch.is_tensor(targets):
+        #     data = data.numpy()
+        #     targets = targets.numpy()
+        # elif type(targets) == list:
+        #     data = np.array(data)
+        #     targets = np.array(targets)
 
         return data, targets
 
@@ -81,14 +81,14 @@ class DataLoaderConstructor:
 
         for task_indexes in indexes:
             if self.config.dataset_type == 'softmax':
-                # dataset = SimpleDataset(data, targets, task_indexes, transform=transforms)
-                dataset = torchvision.datasets.CIFAR100('./data', train=self.config.train, 
-                                                        download=True, transform=transforms)
+                dataset = SimpleDataset(data, targets, transform=transforms)
+                # dataset = torchvision.datasets.CIFAR100('./data', train=self.config.train, 
+                #                                         download=True, transform=transforms)
             
             kwargs = {'num_workers': self.config.workers, 'pin_memory': True} if \
                 torch.cuda.device_count() > 0 else {}
             data_loader = torch.utils.data.DataLoader(
-                dataset, batch_size=self.config.batch_size, shuffle=False, **kwargs)
+                dataset, batch_size=self.config.batch_size, shuffle=True, **kwargs)
             data_loaders.append(data_loader)
 
         return data_loaders
@@ -96,20 +96,17 @@ class DataLoaderConstructor:
 
 class SimpleDataset(torch.utils.data.Dataset):
 
-    def __init__(self, data, targets, indexes, transform=None):
+    def __init__(self, data, targets, transform=None):
         self.data = data
         self.targets = targets
-        self.indexes = indexes
         self.transform = transform
         
     def __len__(self):
-        return len(self.indexes)
+        return len(self.targets)
 
     def __getitem__(self, idx):
-        org_idx = self.indexes[idx]
-        img, target = self.data[org_idx], int(self.targets[org_idx])
-        mode = 'L' if len(img.shape) == 2 else 'RGB'
-        img = Image.fromarray(img, mode=mode)
+        img, target = self.data[idx], self.targets[idx]
+        img = Image.fromarray(img)
 
         if self.transform is not None:
             img = self.transform(img)
