@@ -58,17 +58,18 @@ def train(epoch):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\t'
-            'DTime {data_time.avg:.3f}\t'
-            'BTime {batch_time.avg:.3f}\t'
-            'Loss: {:0.4f}\tLR: {:0.6f}'.format(
-            loss.item(),
-            optimizer.param_groups[0]['lr'],
-            epoch=epoch,
-            trained_samples=batch_index * args.b + len(images),
-            total_samples=len(cifar100_training_loader.dataset),
-            batch_time=batch_time, data_time=data_time
-        ))
+        if batch_index % 100 == 0:
+            print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\t'
+                'DTime {data_time.avg:.3f}\t'
+                'BTime {batch_time.avg:.3f}\t'
+                'Loss: {:0.4f}\tLR: {:0.6f}'.format(
+                loss.item(),
+                optimizer.param_groups[0]['lr'],
+                epoch=epoch,
+                trained_samples=batch_index * args.b + len(images),
+                total_samples=len(cifar100_training_loader.dataset),
+                batch_time=batch_time, data_time=data_time
+            ))
 
 
 def eval_training(epoch):
