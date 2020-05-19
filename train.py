@@ -26,7 +26,7 @@ from torch.autograd import Variable
 from conf import settings
 from utils import get_network, get_training_dataloader, get_test_dataloader
 from models.myresnet import resnet
-from data_utils import DataConfig, DataLoaderConstructor
+from data_utils import DataLoaderConstructor
 
 def train(epoch):
 
@@ -162,13 +162,9 @@ if __name__ == '__main__':
 
     #data preprocessing:
     if args.new_data_loader:
-        data_config = DataConfig(train=True, dataset='cifar100',
-                                 dataset_type='softmax', is_continual=True, 
-                                 batch_size=args.b, workers=args.w,  tasks=1, 
-                                 exemplar_size=0, oversample_ratio=0.0)
-        cifar100_training_loader = DataLoaderConstructor(data_config).data_loaders[0]
-        data_config.train = False
-        cifar100_test_loader = DataLoaderConstructor(data_config).data_loaders[0]
+        cifar100_training_loader = DataLoaderConstructor(train=True, batch_size=args.b, workers=args.w).data_loader
+
+        cifar100_test_loader = DataLoaderConstructor(train=False, batch_size=args.b, workers=args.w).data_loader
     else:
         cifar100_training_loader = get_training_dataloader(
             CIFAR100_TRAIN_MEAN,
